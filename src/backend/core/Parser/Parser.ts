@@ -21,7 +21,7 @@ export default class Parser {
 
         if ((match = regexp.exec(releaseTitle)) !== null) {
             return {
-                matchedSection: match?.[0],
+                matchedSection: match?.[0].trim(),
                 volumeFrom: match?.[1],
                 volumeTo: match?.[2],
             };
@@ -30,12 +30,12 @@ export default class Parser {
 
     extractChapterInformation(releaseTitle: string) {
         let match: RegExpExecArray;
-        const regexp = new RegExp('(\\d{1,3})(?:-(\\d{1,3} ))?');
-
         // {1,3} to avoid confusing chapter with release year e.g "(2023-2024)"
+        const regexp = new RegExp('[^\\d-(](\\d{1,3})(?:-(\\d{1,3}) )?');
+
         if ((match = regexp.exec(releaseTitle)) !== null) {
             return {
-                matchedSection: match?.[0],
+                matchedSection: match?.[0].trim(),
                 chapterFrom: match?.[1],
                 chapterTo: match?.[2],
             };
