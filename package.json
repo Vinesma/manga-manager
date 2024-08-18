@@ -31,12 +31,13 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "vite": "^5.1.4",
-    "vite-tsconfig-paths": "^4.3.1"
+    "vite-tsconfig-paths": "^4.3.1",
+    "vitest": "^1.6.0"
   },
   "scripts": {
     "client": "npm run -w frontend dev",
     "server": "npm run -w backend dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest"
   },
   "author": "Vinesma",
   "license": "MIT"
