@@ -1,14 +1,15 @@
 import express from 'express';
 import { Server as HttpServer } from 'http';
 import { Database } from '../database';
+import { Logger } from '../logger';
 import { Series } from '../../entities/Series';
 
 export default class Server {
     private readonly app = express();
     private readonly database = new Database();
     private readonly port: number;
+    private readonly logger = new Logger(Server.name);
     private server?: HttpServer;
-    private logContext = `[${Server.name}]`;
 
     constructor(PORT: number) {
         this.port = PORT;
@@ -20,14 +21,14 @@ export default class Server {
     }
 
     private logSystemInfo() {
-        console.log(this.logContext, 'Node version:', process.version);
-        console.log(this.logContext, 'Platform:', process.platform);
-        console.log(this.logContext, 'Arch:', process.arch);
+        this.logger.info('Node version:', process.version);
+        this.logger.info('Platform:', process.platform);
+        this.logger.info('Arch:', process.arch);
     }
 
     async start() {
         try {
-            console.log(this.logContext, 'Server startup...');
+            this.logger.info('Server startup...');
 
             this.initProcessEvents();
             this.logSystemInfo();
@@ -37,17 +38,17 @@ export default class Server {
             this.app.use(express.json());
 
             this.server = this.app.listen(this.port, () => {
-                console.log(this.logContext, 'Running on port:', this.port);
+                this.logger.info('Running on port:', this.port);
 
                 (async () => {
                     const seriesRepository = this.database.dataSource.getRepository(Series);
 
                     const allSeries = await seriesRepository.find();
-                    console.log(this.logContext, 'All series in DB', allSeries);
+                    this.logger.info('All series in DB', allSeries);
                 })();
             });
         } catch (error) {
-            console.error(this.logContext, error);
+            this.logger.fatal(error);
             this.stop('Stopped due to error.', { error: true });
         }
     }
@@ -55,17 +56,18 @@ export default class Server {
     async stop(message: string, options?: { error?: boolean }) {
         const exitStatus = options?.error ? 1 : 0;
 
-        console.log('\n%s', this.logContext, message);
+        this.logger.info(message);
         await this.database.close();
 
         if (!this.server) {
-            console.log(this.logContext, 'No running server to stop.');
-            process.exit(exitStatus);
+            this.logger.warn('No running server to stop!');
+            process.exitCode = exitStatus;
+            throw Error('Server did not start.');
         }
 
         this.server.close(() => {
-            console.log(this.logContext, 'HTTP server closed.');
-            process.exit(exitStatus);
+            this.logger.info('HTTP server closed.');
+            process.exitCode = exitStatus;
         });
     }
 }
