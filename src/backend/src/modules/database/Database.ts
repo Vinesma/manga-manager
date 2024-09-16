@@ -1,5 +1,6 @@
 import { entities } from '../../../src/entities';
 import { DataSource } from 'typeorm';
+import { Logger } from '../logger';
 
 export default class Database {
     dataSource = new DataSource({
@@ -11,12 +12,12 @@ export default class Database {
         migrations: [],
         subscribers: [],
     });
-    private logContext = `[${Database.name}]`;
+    private readonly logger = new Logger(Database.name);
 
     async init() {
         try {
             await this.dataSource.initialize();
-            console.log(this.logContext, 'Data source initialized successfully.');
+            this.logger.info('Data source initialized successfully.');
         } catch (error) {
             throw error;
         }
@@ -24,6 +25,6 @@ export default class Database {
 
     async close() {
         await this.dataSource.destroy();
-        console.log(this.logContext, 'Data source connection destroyed.');
+        this.logger.info('Data source connection destroyed.');
     }
 }
