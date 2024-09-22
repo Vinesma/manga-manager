@@ -1,4 +1,3 @@
-import { entities } from '../../../src/entities';
 import { DataSource } from 'typeorm';
 import { Logger } from '../logger';
 
@@ -7,8 +6,8 @@ export default class Database {
         type: 'sqlite',
         database: 'database.sqlite',
         synchronize: true,
-        logging: false,
-        entities,
+        logging: ['query', 'error'],
+        entities: ['src/entities/*.ts'],
         migrations: [],
         subscribers: [],
     });
