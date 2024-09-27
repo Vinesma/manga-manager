@@ -2,7 +2,9 @@ import express from 'express';
 import { Server as HttpServer } from 'http';
 import { Database } from '../database';
 import { Logger } from '../logger';
-import { Series } from '../../entities/Series';
+import { SeriesScanner, BookScanner } from '../scanners';
+import { Parser } from '../rss/Parser';
+import { BookRepository, RootPathRepository, SeriesRepository } from '../repositories';
 
 export default class Server {
     private readonly app = express();
@@ -10,6 +12,10 @@ export default class Server {
     private readonly port: number;
     private readonly logger = new Logger(Server.name);
     private server?: HttpServer;
+
+    private seriesScanner: SeriesScanner;
+    private bookScanner: BookScanner;
+    private seriesBookParser: Parser;
 
     constructor(PORT: number) {
         this.port = PORT;
@@ -41,10 +47,35 @@ export default class Server {
                 this.logger.info('Running on port:', this.port);
 
                 (async () => {
-                    const seriesRepository = this.database.dataSource.getRepository(Series);
+                    const rootPathRepository = new RootPathRepository(this.database.dataSource);
+                    const seriesRepository = new SeriesRepository(this.database.dataSource);
+                    // const seriesAlternateTitleRepository =
+                    //     this.database.dataSource.getRepository(SeriesAlternateTitle);
+                    const bookRepository = new BookRepository(this.database.dataSource);
 
-                    const allSeries = await seriesRepository.find();
-                    this.logger.info('All series in DB', allSeries);
+                    this.seriesBookParser = new Parser();
+                    this.bookScanner = new BookScanner(bookRepository, this.seriesBookParser);
+                    this.seriesScanner = new SeriesScanner(seriesRepository, this.bookScanner);
+
+                    const rootPaths = await rootPathRepository.listAll({
+                        relations: { series: true },
+                    });
+                    await this.seriesScanner.scanRootPath(rootPaths[0], rootPaths[0].series);
+
+                    // const testRootPath = rootPathRepository.create({
+                    //     path: '/home/vinesma/Documents/Manga/ForTesting',
+                    //     series: [],
+                    // });
+                    // const series = await this.seriesScanner.scanRootPath(
+                    //     testRootPath,
+                    //     testRootPath.series
+                    // );
+                    // testRootPath.series = series;
+                    // rootPathRepository.save(testRootPath);
+
+                    await rootPathRepository.listAll({ relations: { series: true } }, true);
+                    await seriesRepository.listAll({ relations: { books: true } }, true);
+                    await bookRepository.listAll(undefined, true);
                 })();
             });
         } catch (error) {
