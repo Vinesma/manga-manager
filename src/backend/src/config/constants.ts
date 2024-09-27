@@ -6,3 +6,7 @@ export const LogLevel = {
     ERROR: 4,
     FATAL: 5,
 };
+
+export const DEFAULT = {
+    PORT: 7569,
+};

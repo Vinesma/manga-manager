@@ -1,8 +1,9 @@
 import { Feed } from './modules/rss/Feed';
 import { Server } from './modules/server';
+import { DEFAULT } from './config/constants';
 import 'reflect-metadata';
 
-const PORT = Number(process.env.PORT) || 7569;
+const PORT = Number(process.env.PORT) || DEFAULT.PORT;
 
 const server = new Server(PORT);
 server.start();
