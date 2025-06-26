@@ -2,18 +2,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Logger } from '../logger';
 import { Parser } from '../rss/Parser';
-import { BookRepository } from '../repositories';
+import { Database } from '../database';
+import { Book } from '../../entities';
+import { RepositoryMethods } from '../repositories';
 
 export default class BookScanner {
     private readonly logger = new Logger(BookScanner.name);
-    private readonly bookRepository;
     private readonly seriesBookParser;
+    private readonly repositoryMethods;
 
     static SUPPORTED_FORMATS = ['.pdf', '.cbz'];
 
-    constructor(bookRepository: BookRepository, seriesBookParser: Parser) {
-        this.bookRepository = bookRepository;
+    constructor(seriesBookParser: Parser) {
         this.seriesBookParser = seriesBookParser;
+        this.repositoryMethods = new RepositoryMethods(Database.getRepository(Book), this.logger);
     }
 
     private async bookFromFile(filename: string) {
@@ -27,7 +29,7 @@ export default class BookScanner {
             const parsedVolume = volumeParse?.volumeFrom ?? 1;
             const parsedChapter = chapterParse?.chapterFrom ?? 1;
 
-            const book = this.bookRepository.create({
+            const book = this.repositoryMethods.create({
                 filename,
                 title,
                 volume: Number(parsedVolume),
@@ -35,7 +37,7 @@ export default class BookScanner {
                 monitored: false,
             });
 
-            await this.bookRepository.save(book);
+            await this.repositoryMethods.save(book);
 
             return book;
         } catch (error) {
