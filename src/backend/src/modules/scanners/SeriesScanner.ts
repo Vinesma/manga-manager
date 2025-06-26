@@ -3,16 +3,17 @@ import path from 'node:path';
 import { Logger } from '../logger';
 import { RootPath, Series } from '../../entities';
 import { BookScanner } from '.';
-import { SeriesRepository } from '../repositories';
+import { RepositoryMethods } from '../repositories';
+import { Database } from '../database';
 
 export default class SeriesScanner {
-    private readonly seriesRepository;
     private readonly bookScanner;
     private readonly logger = new Logger(SeriesScanner.name);
+    private readonly repositoryMethods;
 
-    constructor(seriesRepository: SeriesRepository, bookScanner: BookScanner) {
-        this.seriesRepository = seriesRepository;
+    constructor(bookScanner: BookScanner) {
         this.bookScanner = bookScanner;
+        this.repositoryMethods = new RepositoryMethods(Database.getRepository(Series), this.logger);
     }
 
     private async seriesFromDirectory(
@@ -27,7 +28,7 @@ export default class SeriesScanner {
 
         const books = await this.bookScanner.booksFromDirectory(directory, rootPath.path);
 
-        const series = this.seriesRepository.create({
+        const series = this.repositoryMethods.create({
             title: directory,
             directory,
             monitored: false,
@@ -57,7 +58,7 @@ export default class SeriesScanner {
             }
         }
 
-        await this.seriesRepository.save(series);
+        await this.repositoryMethods.save(series);
 
         return series;
     }

@@ -1,20 +1,25 @@
 import { DataSource } from 'typeorm';
 import { RootPath } from '../../entities';
 import { Logger } from '../logger';
-import { BaseRepository, TListAllOptions } from './BaseRepository';
+import { RepositoryMethods } from './RepositoryMethods';
 
-export class RootPathRepository extends BaseRepository<RootPath> {
+export class RootPathRepository {
+    private readonly repositoryMethods;
+
     constructor(dataSource: DataSource) {
-        super(dataSource, dataSource.getRepository(RootPath), new Logger(RootPathRepository.name));
+        this.repositoryMethods = new RepositoryMethods(
+            dataSource.getRepository(RootPath),
+            new Logger(RootPathRepository.name)
+        );
     }
 
-    async listAll(options?: TListAllOptions<RootPath>, log?: boolean) {
-        const allRootPaths = await super.listAll(options);
+    async listAll(options?: Parameters<typeof this.repositoryMethods.listAll>[0], log?: boolean) {
+        const allRootPaths = await this.repositoryMethods.listAll(options);
 
         if (log) {
-            this.logger.info('All RootPaths:', allRootPaths);
+            this.repositoryMethods.logger.info('All RootPaths:', allRootPaths);
 
-            this.logger.info(
+            this.repositoryMethods.logger.info(
                 'All Series from all RootPaths:',
                 allRootPaths.map((rootPath) => rootPath.series)
             );

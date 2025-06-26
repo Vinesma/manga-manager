@@ -1,15 +1,13 @@
-import { DataSource, DeepPartial, FindManyOptions, Repository } from 'typeorm';
+import { DeepPartial, FindManyOptions, Repository } from 'typeorm';
 import { Logger } from '../logger';
 
 export type TListAllOptions<EntityObject> = FindManyOptions<EntityObject>;
 
-export class BaseRepository<EntityObject> {
-    protected readonly dataSource;
-    protected readonly repository;
-    protected readonly logger;
+export class RepositoryMethods<EntityObject> {
+    private readonly repository;
+    public readonly logger;
 
-    constructor(dataSource: DataSource, repository: Repository<EntityObject>, logger: Logger) {
-        this.dataSource = dataSource;
+    constructor(repository: Repository<EntityObject>, logger: Logger) {
         this.repository = repository;
         this.logger = logger;
     }
