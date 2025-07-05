@@ -3,7 +3,7 @@ import { LogLevel } from '../../config/constants';
 type TLogLevelKeys = keyof typeof LogLevel;
 
 export default class Logger {
-    private logLevel = LogLevel.INFO;
+    private logLevel = parseInt(process.env.LOG_LEVEL || '', 10) || LogLevel.INFO;
     private sourceContext: string = Logger.name;
 
     constructor(sourceContext: string) {

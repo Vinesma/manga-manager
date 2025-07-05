@@ -2,14 +2,18 @@ import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
-    OneToMany,
-    BeforeInsert,
     ManyToOne,
+    OneToMany,
+    Generated,
+    CreateDateColumn,
+    UpdateDateColumn,
+    VersionColumn,
+    BeforeInsert,
 } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 import type { Book } from './Book';
 import type { SeriesAlternateTitle } from './SeriesAlternateTitle';
 import type { RootPath } from './RootPath';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 export class Series {
@@ -21,7 +25,7 @@ export class Series {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ unique: true })
     uuid: string;
 
     @Column()
@@ -32,6 +36,15 @@ export class Series {
 
     @Column()
     monitored: boolean;
+
+    @CreateDateColumn()
+    creationDate: Date;
+
+    @UpdateDateColumn()
+    updateDate: Date;
+
+    @VersionColumn()
+    tableVersion: number;
 
     @ManyToOne('RootPath', (rootPath: RootPath) => rootPath.series)
     rootPath: RootPath;

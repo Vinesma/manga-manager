@@ -1,0 +1,31 @@
+@host = http://localhost:7569/api/user
+
+# Create a new user
+POST {{host}}
+Content-Type: application/json
+
+{ "username": "John Doe", "password": "test" }
+###
+# Remove a user by uuid
+DELETE {{host}}
+Content-Type: application/json
+
+{ "uuid": "5991c98f-6750-445e-a21a-4223f03139e5" }
+###
+# Login with a user
+POST {{host}}/login
+Content-Type: application/json
+
+{ "username": "John Doe", "password": "test" }
+###
+# Logout and destroy jwt cookie
+POST {{host}}/logout
+###
+# Get the current logged in user
+GET {{host}}/me
+###
+# Get a specific user via uuid
+GET {{host}}/profile/e436bd45-bf8b-4188-87db-626a49ed4988
+###
+# Get all users
+GET {{host}}/all

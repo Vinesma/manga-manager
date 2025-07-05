@@ -1,6 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, BeforeInsert } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    Generated,
+    CreateDateColumn,
+    UpdateDateColumn,
+    VersionColumn,
+    BeforeInsert,
+} from 'typeorm';
 import type { Series } from './Series';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 export class SeriesAlternateTitle {
@@ -12,11 +22,20 @@ export class SeriesAlternateTitle {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ unique: true })
     uuid: string;
 
     @Column()
     title: string;
+
+    @CreateDateColumn()
+    creationDate: Date;
+
+    @UpdateDateColumn()
+    updateDate: Date;
+
+    @VersionColumn()
+    tableVersion: number;
 
     @ManyToOne('Series', (series: Series) => series.alternateTitles)
     series: Series;
