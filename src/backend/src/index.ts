@@ -1,11 +1,9 @@
+import 'dotenv/config';
+import 'reflect-metadata';
 import { Feed } from './modules/rss/Feed';
 import { Server } from './modules/server';
-import { DEFAULT } from './config/constants';
-import 'reflect-metadata';
 
-const PORT = Number(process.env.PORT) || DEFAULT.PORT;
-
-const server = new Server(PORT);
+const server = new Server();
 server.start();
 
 const feed = new Feed({

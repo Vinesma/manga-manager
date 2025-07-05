@@ -4,6 +4,8 @@ import { Database } from '../database';
 import { Logger } from '../logger';
 import { SeriesScanner, BookScanner } from '../scanners';
 import { Parser } from '../rss/Parser';
+import { ApiRouter } from '../../routers';
+import cookieParser from 'cookie-parser';
 
 export default class Server {
     private readonly app = express();
@@ -12,17 +14,18 @@ export default class Server {
     private readonly logger = new Logger(Server.name);
     private server?: HttpServer;
 
+    private apiRouter = new ApiRouter();
     private seriesScanner: SeriesScanner;
     private bookScanner: BookScanner;
     private seriesBookParser: Parser;
 
-    constructor(PORT: number) {
-        this.port = PORT;
+    constructor() {
+        this.port = parseInt(process.env.PORT || '', 10) || 5000;
     }
 
     private initProcessEvents() {
-        process.on('SIGINT', () => this.stop('SIGINT received: shutting down...'));
-        process.on('SIGTERM', () => this.stop('SIGTERM received: shutting down...'));
+        process.on('SIGINT', () => this.stop('\nSIGINT received: shutting down...'));
+        process.on('SIGTERM', () => this.stop('\nSIGTERM received: shutting down...'));
     }
 
     private logSystemInfo() {
@@ -41,11 +44,15 @@ export default class Server {
             await this.database.initialize();
 
             this.app.use(express.json());
+            this.app.use(cookieParser());
+
+            this.app.use('/api', this.apiRouter.router);
 
             this.server = this.app.listen(this.port, () => {
                 this.logger.info('Running on port:', this.port);
             });
         } catch (error) {
+            this.logger.info('PORT ENV', JSON.stringify(process.env.PORT));
             this.logger.fatal(error);
             this.stop('Stopped due to error.', { error: true });
         }
