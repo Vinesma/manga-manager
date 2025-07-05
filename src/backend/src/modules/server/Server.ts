@@ -52,7 +52,6 @@ export default class Server {
                 this.logger.info('Running on port:', this.port);
             });
         } catch (error) {
-            this.logger.info('PORT ENV', JSON.stringify(process.env.PORT));
             this.logger.fatal(error);
             this.stop('Stopped due to error.', { error: true });
         }
